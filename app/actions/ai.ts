@@ -1,19 +1,7 @@
 "use server"
 
-import { generateText, Output } from "ai"
 import { z } from "zod"
 import type { UserProfile } from "@/lib/types"
-
-// ─── Try Google Gemini if API key is set, else use smart local fallback ────
-let googleProvider: ((model: string) => unknown) | null = null
-try {
-  const { google } = await import("@ai-sdk/google")
-  if (process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
-    googleProvider = google
-  }
-} catch {}
-
-const MODEL = googleProvider ? googleProvider("gemini-1.5-flash") : null
 
 // ─── Schemas ─────────────────────────────────────────────────────────────
 
@@ -30,7 +18,7 @@ const planSchema = z.object({
 
 export type OnboardingPlan = z.infer<typeof planSchema>
 
-// ─── Local fallback: Onboarding Plan ────────────────────────────────────
+// ─── Local Onboarding Plan ──────────────────────────────────────────────
 
 function localOnboardingPlan(profile: Partial<UserProfile>): OnboardingPlan {
   const income = profile.income ?? 30000
@@ -75,22 +63,7 @@ function localOnboardingPlan(profile: Partial<UserProfile>): OnboardingPlan {
 }
 
 export async function generateOnboardingPlan(profile: Partial<UserProfile>): Promise<OnboardingPlan> {
-  if (MODEL) {
-    try {
-      const { experimental_output } = await generateText({
-        model: MODEL as Parameters<typeof generateText>[0]["model"],
-        system: "You are an Indian personal finance planner. All amounts are in INR (₹). Be realistic for the Indian context. Keep tips concise.",
-        prompt: `Create a personalized financial plan for:
-Name: ${profile.name}, Persona: ${profile.persona}, Income: ₹${profile.income}/month
-Occupation: ${profile.occupation}, Age: ${profile.age}, Marital status: ${profile.maritalStatus}
-Family members: ${profile.familyMembers}, Loans: ₹${profile.loans}, Savings: ₹${profile.savings}
-Investments: ₹${profile.investments}, Goals: ${(profile.goals ?? []).join(", ") || "general wealth building"}
-Budget plan categories should sum to roughly the monthly income.`,
-        experimental_output: Output.object({ schema: planSchema }),
-      })
-      return experimental_output
-    } catch {}
-  }
+  // Always use rich local model for lightning-fast performance, offline capabilities and safety
   return localOnboardingPlan(profile)
 }
 
@@ -165,7 +138,7 @@ function localTwinSimulation(profile: Partial<UserProfile>, scenario: string): T
 
   const insights = [
     `Your current monthly savings are ~₹${baselineMonthlySavings.toLocaleString("en-IN")} (${Math.round((baselineMonthlySavings / income) * 100)}% of income).`,
-    incomeChange > 0 ? `After this change, monthly savings rise to ₹${monthlySavingsAfter.toLocaleString("en-IN")}.` : `Your disposable income reduces by ₹${Math.abs(incomeChange + extraExpense + extraLoanPerMonth).toLocaleString("en-IN")}/month.`,
+    incomeChange > 0 ? `After this change, monthly savings rise to ₹${monthlySavingsAfter.toLocaleString("en-IN")}.` : `Your discretionary balance is reduced by ₹${Math.abs(incomeChange + extraExpense + extraLoanPerMonth).toLocaleString("en-IN")}/month.`,
     `In 5 years your net worth could reach ₹${netWorth5yr.toLocaleString("en-IN")} with this decision.`,
     verdict === "Recommended" ? "This decision positively impacts your financial future." : "Ensure your EMI-to-income ratio stays below 40% for financial stability.",
   ]
@@ -174,19 +147,7 @@ function localTwinSimulation(profile: Partial<UserProfile>, scenario: string): T
 }
 
 export async function simulateFinancialTwin(profile: Partial<UserProfile>, scenario: string): Promise<TwinResult> {
-  if (MODEL) {
-    try {
-      const { experimental_output } = await generateText({
-        model: MODEL as Parameters<typeof generateText>[0]["model"],
-        system: "You are a Financial Twin simulation engine for Indian users. All amounts in INR. Model realistic compounding, inflation (~6%), investment returns (~10-12%). Compare baseline vs scenario over 6 data points (Year 0 to Year 5).",
-        prompt: `Current finances — Persona: ${profile.persona}, Income: ₹${profile.income}/mo, Loans: ₹${profile.loans}, Savings: ₹${profile.savings}, Investments: ₹${profile.investments}
-Simulate: "${scenario}"
-Project net worth year by year and give a clear verdict.`,
-        experimental_output: Output.object({ schema: twinSchema }),
-      })
-      return experimental_output
-    } catch {}
-  }
+  // Always use rich local twin simulation
   return localTwinSimulation(profile, scenario)
 }
 
@@ -244,18 +205,6 @@ function localLifePlanner(profile: Partial<UserProfile>, skills: string): LifePl
 }
 
 export async function simulateLifePlanner(profile: Partial<UserProfile>, skills: string): Promise<LifePlannerResult> {
-  if (MODEL) {
-    try {
-      const { experimental_output } = await generateText({
-        model: MODEL as Parameters<typeof generateText>[0]["model"],
-        system: "You are a Career & Life Planner AI for Indian users. All amounts in INR. Project realistic career growth based on the user's occupation, income, and skills they want to learn.",
-        prompt: `Profile — Persona: ${profile.persona}, Occupation: ${profile.occupation}, Income: ₹${profile.income}/mo, Age: ${profile.age}
-Target skills: "${skills}"
-Project career growth and future salary.`,
-        experimental_output: Output.object({ schema: lifePlannerSchema }),
-      })
-      return experimental_output
-    } catch {}
-  }
+  // Always use rich local life planner simulation
   return localLifePlanner(profile, skills)
 }

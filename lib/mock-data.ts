@@ -2,6 +2,7 @@ import type { Expense, Goal, UserProfile } from "./types"
 
 export const defaultProfile: UserProfile = {
   name: "Aarav Sharma",
+  email: "aarav@example.com",
   persona: "Professional",
   income: 40000,
   occupation: "Software Engineer",
@@ -12,7 +13,7 @@ export const defaultProfile: UserProfile = {
   savings: 95000,
   investments: 60000,
   goals: ["Emergency Fund", "Buy a Laptop", "Trip to Goa"],
-  onboarded: true,
+  onboarded: false,
 }
 
 function daysAgo(n: number): string {

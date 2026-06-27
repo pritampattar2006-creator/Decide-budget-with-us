@@ -30,6 +30,7 @@ export interface Goal {
 
 export interface UserProfile {
   name: string
+  email: string
   persona: "Student" | "Fresher" | "Professional" | "Family" | "Freelancer"
   income: number
   occupation: string

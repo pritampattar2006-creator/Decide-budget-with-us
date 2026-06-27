@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useChat } from "@ai-sdk/react"
 import { DefaultChatTransport } from "ai"
-import { Send, Sparkles, Bot, User } from "lucide-react"
+import { Send, Sparkles, Bot, User, Zap } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { PageHeader } from "@/components/page-header"
@@ -61,6 +61,13 @@ export default function CoachPage() {
         title="AI Financial Coach"
         description="Ask anything about your money. Answers are grounded in your real income, expenses, EMIs, and goals."
       />
+
+      {/* AI mode badge */}
+      <div className="flex items-center gap-2 mt-1">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-green-500/10 px-3 py-1 text-xs font-medium text-green-600">
+          <Zap className="size-3" /> SmartBudget AI Engine — Active
+        </span>
+      </div>
 
       <div className="mt-6 flex flex-1 flex-col overflow-hidden rounded-2xl border border-border bg-card">
         <div className="flex-1 space-y-4 overflow-y-auto p-5">

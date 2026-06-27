@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import {
   LayoutDashboard,
   Receipt,
@@ -23,9 +23,14 @@ import {
   PiggyBank,
   Share2,
   ShieldAlert,
+  LogOut,
+  Settings,
+  User,
+  ChevronUp,
 } from "lucide-react"
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import { cn } from "@/lib/utils"
+import { useStore } from "@/lib/store"
 
 const navGroups = [
   {
@@ -120,9 +125,100 @@ function Brand() {
   )
 }
 
+function ProfileWidget() {
+  const { profile, session, logout } = useStore()
+  const router = useRouter()
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  // Close on outside click
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener("mousedown", handler)
+    return () => document.removeEventListener("mousedown", handler)
+  }, [])
+
+  const initials = profile.name
+    ? profile.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase()
+    : "?"
+
+  function handleLogout() {
+    logout()
+    router.push("/login")
+  }
+
+  return (
+    <div ref={ref} className="relative">
+      {/* Dropdown */}
+      {open && (
+        <div className="absolute bottom-full left-0 right-0 mb-2 rounded-xl border border-sidebar-border bg-sidebar shadow-xl overflow-hidden z-50">
+          {/* User info */}
+          <div className="px-4 py-3 border-b border-sidebar-border">
+            <p className="text-sm font-semibold text-sidebar-foreground">{profile.name}</p>
+            <p className="text-xs text-sidebar-foreground/60 truncate">@{session?.username ?? profile.email}</p>
+          </div>
+          {/* Menu items */}
+          <div className="py-1">
+            <Link
+              href="/profile"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-3 px-4 py-2.5 text-sm text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+            >
+              <User className="size-4" /> View Profile
+            </Link>
+            <Link
+              href="/profile"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-3 px-4 py-2.5 text-sm text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+            >
+              <Settings className="size-4" /> Settings
+            </Link>
+            <Link
+              href="/profile#security"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-3 px-4 py-2.5 text-sm text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+            >
+              <ShieldAlert className="size-4" /> Security
+            </Link>
+          </div>
+          <div className="border-t border-sidebar-border py-1">
+            <button
+              onClick={handleLogout}
+              className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-destructive hover:bg-destructive/10 transition-colors"
+            >
+              <LogOut className="size-4" /> Sign Out
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Trigger button */}
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center gap-3 rounded-xl bg-sidebar-accent px-3 py-2.5 transition-colors hover:bg-sidebar-accent/80"
+      >
+        <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-sidebar-primary text-sidebar-primary-foreground text-xs font-bold">
+          {initials}
+        </div>
+        <div className="min-w-0 flex-1 text-left">
+          <p className="truncate text-xs font-semibold text-sidebar-foreground">{profile.name}</p>
+          <p className="truncate text-[11px] text-sidebar-foreground/60">{profile.persona}</p>
+        </div>
+        <ChevronUp className={cn("size-4 text-sidebar-foreground/40 transition-transform", open && "rotate-180")} />
+      </button>
+    </div>
+  )
+}
+
 export function AppSidebar() {
   const [open, setOpen] = useState(false)
-  const pathname = usePathname()
+  const { profile, isAuthenticated } = useStore()
+
+  if (!isAuthenticated || !profile.onboarded) {
+    return null
+  }
 
   return (
     <>
@@ -149,15 +245,10 @@ export function AppSidebar() {
         <div className="pt-2">
           <Brand />
         </div>
-        <NavLinks />
-        <div className="mt-auto rounded-xl bg-sidebar-accent p-3.5">
-          <p className="text-xs font-semibold text-sidebar-accent-foreground">
-            22 AI Modules Active
-          </p>
-          <p className="mt-0.5 text-[11px] text-sidebar-foreground/60">
-            SmartBudget AI — Financial Operating System
-          </p>
+        <div className="flex-1 overflow-y-auto">
+          <NavLinks />
         </div>
+        <ProfileWidget />
       </aside>
     </>
   )

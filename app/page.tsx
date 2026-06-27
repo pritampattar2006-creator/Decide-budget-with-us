@@ -54,8 +54,8 @@ export default function LandingPage() {
           </span>
           <span className="text-lg font-semibold">SmartBudget AI</span>
         </div>
-        <Button render={<Link href="/dashboard" />}>
-          Open App <ArrowRight className="size-4" />
+        <Button render={<Link href="/login" />}>
+          Log in <ArrowRight className="size-4" />
         </Button>
       </header>
 
@@ -73,15 +73,8 @@ export default function LandingPage() {
           families can build wealth with confidence.
         </p>
         <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <Button render={<Link href="/dashboard" />} size="lg">
-            Launch Dashboard <ArrowRight className="size-4" />
-          </Button>
-          <Button
-            render={<Link href="/onboarding" />}
-            size="lg"
-            variant="outline"
-          >
-            Start onboarding
+          <Button render={<Link href="/login" />} size="lg">
+            Sign In to Get Started <ArrowRight className="size-4" />
           </Button>
         </div>
 
@@ -124,8 +117,8 @@ export default function LandingPage() {
       <footer className="border-t border-border">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-6 py-8 text-sm text-muted-foreground sm:flex-row">
           <p>SmartBudget AI — built as a product MVP demo.</p>
-          <Link href="/dashboard" className="font-medium text-primary">
-            Open the app →
+          <Link href="/login" className="font-medium text-primary">
+            Sign In →
           </Link>
         </div>
       </footer>
